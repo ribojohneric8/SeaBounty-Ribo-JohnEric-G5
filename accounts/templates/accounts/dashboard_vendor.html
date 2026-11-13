@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Vendor dashboard{% endblock %}
+{% block role_nav %}<a href="#">My stalls</a><a href="#">Post catch update</a>{% endblock %}
+{% block content %}
+<h1>Hi {{ user.full_name }}, ready to post today's catch?</h1>
+<p class="sub">Your vendor dashboard</p>
+<div class="grid">
+  <article class="card"><h2>My stalls</h2><p class="empty">You haven't listed a stall yet. Stall management is coming in the next phase.</p></article>
+  <article class="card"><h2>Today's catch</h2><p class="empty">Post what you have on ice so buyers can find you.</p></article>
+</div>
+{% endblock %}

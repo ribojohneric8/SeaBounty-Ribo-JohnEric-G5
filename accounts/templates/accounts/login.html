@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<section class="auth">
+  <h1>Welcome back</h1>
+  <p class="sub">Log in to see what's fresh on the island today.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="err block">{{ form.non_field_errors }}</div>{% endif %}
+    {% include "accounts/_field.html" with field=form.username %}
+    {% include "accounts/_field.html" with field=form.password %}
+    {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+    <button type="submit" class="btn">Log in</button>
+  </form>
+  <p class="alt">New here? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+</section>
+{% endblock %}

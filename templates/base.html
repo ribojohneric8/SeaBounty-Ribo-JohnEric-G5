@@ -1,0 +1,38 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SeaBounty{% endblock %} · SeaBounty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'accounts:home' %}">SeaBounty</a>
+    <nav>
+      {% if user.is_authenticated %}
+        <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+        {% block role_nav %}{% endblock %}
+        <a href="{% url 'accounts:profile' %}">My profile</a>
+        <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+          {% csrf_token %}<button type="submit" class="link">Log out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'accounts:login' %}">Log in</a>
+        <a href="{% url 'accounts:register' %}" class="pill">Create account</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if messages %}
+  <div class="messages" role="status">
+    {% for message in messages %}<p class="msg {{ message.tags }}">{{ message }}</p>{% endfor %}
+  </div>
+  {% endif %}
+
+  <main class="page">{% block content %}{% endblock %}</main>
+</body>
+</html>

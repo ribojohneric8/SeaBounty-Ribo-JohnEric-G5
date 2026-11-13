@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Edit profile{% endblock %}
+{% block content %}
+<section class="auth">
+  <h1>Edit profile</h1>
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% include "accounts/_field.html" with field=form.full_name %}
+    {% include "accounts/_field.html" with field=form.email %}
+    {% include "accounts/_field.html" with field=form.contact_number %}
+    {% include "accounts/_field.html" with field=form.profile_photo %}
+    <div class="row">
+      <button type="submit" class="btn">Save changes</button>
+      <a class="btn ghost" href="{% url 'accounts:profile' %}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

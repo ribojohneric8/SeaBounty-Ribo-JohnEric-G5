@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+<section class="auth">
+  <h1>Create your account</h1>
+  <p class="sub">Buyers find fresh catch. Vendors post what's on the ice.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="err block">{{ form.non_field_errors }}</div>{% endif %}
+    {% include "accounts/_field.html" with field=form.full_name %}
+    {% include "accounts/_field.html" with field=form.email %}
+    {% include "accounts/_field.html" with field=form.contact_number %}
+    {% include "accounts/_field.html" with field=form.role %}
+    {% include "accounts/_field.html" with field=form.password1 show_help=True %}
+    {% include "accounts/_field.html" with field=form.password2 %}
+    <button type="submit" class="btn">Create account</button>
+  </form>
+  <p class="alt">Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
+</section>
+{% endblock %}

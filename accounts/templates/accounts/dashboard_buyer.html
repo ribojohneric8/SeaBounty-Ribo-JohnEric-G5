@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Buyer dashboard{% endblock %}
+{% block role_nav %}<a href="#">Find seafood</a><a href="#">Favorite stalls</a>{% endblock %}
+{% block content %}
+<h1>Hi {{ user.full_name }}, what's fresh today?</h1>
+<p class="sub">Your buyer dashboard</p>
+<div class="grid">
+  <article class="card"><h2>Recent catch updates</h2><p class="empty">No updates yet. Stall updates will appear here once vendors start posting.</p></article>
+  <article class="card"><h2>Favorite stalls</h2><p class="empty">You haven't saved any stalls yet.</p></article>
+  <article class="card"><h2>Search seafood</h2><p class="empty">Search for crab, tuna, squid and more. Coming in the next phase.</p></article>
+</div>
+{% endblock %}
