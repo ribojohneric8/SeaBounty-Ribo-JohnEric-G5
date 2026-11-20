@@ -16,5 +16,14 @@
     </ul>
     <p><a class="btn sm" href="{% url 'stalls:create' %}">Add a stall</a></p>
   </article>
+  <article class="card">
+    <h2>My recent catch updates</h2>
+    <ul class="list">
+      {% for u in recent_updates %}
+      <li><span><strong>{{ u.category.name }}</strong> · {{ u.stall.stall_name }}</span><span><span class="price">₱{{ u.price_per_kg }}/kg</span> <a href="{% url 'catches:edit' u.pk %}">Edit</a></span></li>
+      {% empty %}<li class="empty">Nothing posted yet.</li>{% endfor %}
+    </ul>
+    <p><a class="btn sm" href="{% url 'catches:create' %}">Post a catch</a> <a href="{% url 'catches:mine' %}">See all →</a></p>
+  </article>
 </div>
 {% endblock %}

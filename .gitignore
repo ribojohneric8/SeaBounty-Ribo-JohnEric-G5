@@ -18,3 +18,7 @@ staticfiles/
 .vscode/
 .idea/
 .DS_Store
+
+# Local-only testing files
+config/settings_local.py
+db_local.sqlite3
