@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}My stalls{% endblock %}
+{% block role_nav %}{% include "stalls/_nav.html" %}{% endblock %}
+{% block content %}
+<div class="head-row">
+  <div><h1>My stalls</h1><p class="sub">Stalls you manage.</p></div>
+  <a class="btn" href="{% url 'stalls:create' %}">Add a stall</a>
+</div>
+<article class="card">
+  <table>
+    <thead><tr><th>Stall</th><th>Location</th><th>Hours</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for stall in stalls %}
+      <tr>
+        <td><a href="{% url 'stalls:detail' stall.pk %}">{{ stall.stall_name }}</a></td>
+        <td>{{ stall.location|truncatechars:40 }}</td>
+        <td>{{ stall.operating_hours|default:"-" }}</td>
+        <td>{% if stall.is_active %}<span class="badge">Open</span>{% else %}<span class="badge off">Closed</span>{% endif %}</td>
+        <td class="actions"><a href="{% url 'stalls:edit' stall.pk %}">Edit</a> <a href="{% url 'stalls:delete' stall.pk %}">Delete</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5" class="empty">You haven't added a stall yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</article>
+{% endblock %}

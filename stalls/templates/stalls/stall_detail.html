@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ stall.stall_name }}{% endblock %}
+{% block role_nav %}{% include "stalls/_nav.html" %}{% endblock %}
+{% block content %}
+<div class="head-row">
+  <div>
+    <h1>{{ stall.stall_name }}
+      {% if not stall.is_active %}<span class="badge off">Closed</span>{% endif %}</h1>
+    <p class="sub">Run by {{ stall.owner.full_name }}</p>
+  </div>
+  {% if can_manage %}
+  <div class="row">
+    <a class="btn ghost" href="{% url 'stalls:edit' stall.pk %}">Edit</a>
+    <a class="btn ghost" href="{% url 'stalls:delete' stall.pk %}">Delete</a>
+  </div>
+  {% endif %}
+</div>
+<article class="card">
+  <dl>
+    <dt>Location</dt><dd>{{ stall.location }}</dd>
+    <dt>Operating hours</dt><dd>{{ stall.operating_hours|default:"Not posted" }}</dd>
+    <dt>Status</dt><dd>{% if stall.is_active %}Open for business{% else %}Closed{% endif %}</dd>
+  </dl>
+</article>
+{% endblock %}
