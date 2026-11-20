@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Seafood stalls{% endblock %}
+{% block role_nav %}{% include "stalls/_nav.html" %}{% endblock %}
+{% block content %}
+<div class="head-row">
+  <div><h1>Seafood stalls</h1><p class="sub">Find who is selling fresh seafood near you.</p></div>
+  {% if user.is_vendor %}<a class="btn" href="{% url 'stalls:create' %}">Add a stall</a>{% endif %}
+</div>
+<form method="get" class="filters">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by stall name or location" aria-label="Search stalls">
+  <button class="btn" type="submit">Search</button>
+  {% if q %}<a class="btn ghost" href="{% url 'stalls:list' %}">Clear</a>{% endif %}
+</form>
+<div class="grid">
+  {% for stall in stalls %}
+  <article class="card">
+    <h2><a href="{% url 'stalls:detail' stall.pk %}">{{ stall.stall_name }}</a>
+      {% if not stall.is_active %}<span class="badge off">Closed</span>{% endif %}</h2>
+    <p>{{ stall.location }}</p>
+    <p class="empty">{{ stall.operating_hours|default:"Hours not posted" }} · by {{ stall.owner.full_name }}</p>
+  </article>
+  {% empty %}
+  <p class="empty">{% if q %}No stalls match “{{ q }}”.{% else %}No stalls have been listed yet.{% endif %}</p>
+  {% endfor %}
+</div>
+{% endblock %}
