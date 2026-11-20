@@ -22,20 +22,4 @@
     <dt>Status</dt><dd>{% if stall.is_active %}Open for business{% else %}Closed{% endif %}</dd>
   </dl>
 </article>
-<h2 class="section">Today's catch</h2>
-<article class="card">
-  <table>
-    <thead><tr><th>Seafood</th><th>Price / kg</th><th>Posted</th></tr></thead>
-    <tbody>
-    {% for u in stall.updates.all %}
-      <tr><td><strong>{{ u.category.name }}</strong></td><td class="price">₱{{ u.price_per_kg }}</td><td>{{ u.date_posted|date:"M j, g:i A" }}</td></tr>
-    {% empty %}
-      <tr><td colspan="3" class="empty">Nothing posted yet.</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% if can_manage and stall.owner_id == user.pk and stall.is_active %}
-  <p><a class="btn sm" href="{% url 'catches:create' %}?stall={{ stall.pk }}">Post a catch for this stall</a></p>
-  {% endif %}
-</article>
 {% endblock %}

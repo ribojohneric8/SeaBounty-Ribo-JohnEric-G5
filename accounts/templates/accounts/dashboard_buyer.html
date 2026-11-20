@@ -14,15 +14,6 @@
     </ul>
     <p><a href="{% url 'stalls:list' %}">Browse all stalls →</a></p>
   </article>
-  <article class="card">
-    <h2>Recent catch updates</h2>
-    <ul class="list">
-      {% for u in recent_updates %}
-      <li><span><strong>{{ u.category.name }}</strong> · {{ u.stall.stall_name }}</span><span class="price">₱{{ u.price_per_kg }}/kg</span></li>
-      {% empty %}<li class="empty">No updates yet. Vendors will post here.</li>{% endfor %}
-    </ul>
-    <p><a href="{% url 'catches:list' %}">Search all seafood →</a></p>
-  </article>
   <article class="card"><h2>Favorite stalls</h2><p class="empty">Saving favorites is coming in a later phase.</p></article>
 </div>
 {% endblock %}

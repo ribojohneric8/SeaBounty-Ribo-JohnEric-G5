@@ -69,4 +69,3 @@ textarea{font:inherit;padding:.6rem .7rem;border:1.5px solid var(--line);border-
 .list li{display:flex;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid var(--line)}
 .list li:last-child{border-bottom:0}
 .btn.sm{padding:.4rem .9rem;font-size:.9rem}
-h2.section{margin:1.5rem 0 .6rem}

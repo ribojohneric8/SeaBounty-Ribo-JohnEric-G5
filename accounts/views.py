@@ -8,7 +8,6 @@ from django.views.decorators.http import require_POST
 
 from .decorators import role_required
 from .forms import LoginForm, ProfileForm, RegistrationForm
-from catches.models import CatchUpdate
 from stalls.models import Stall
 
 from .models import User
@@ -70,17 +69,12 @@ def dashboard(request):
 @role_required(User.Role.BUYER)
 def buyer_dashboard(request):
     featured = Stall.objects.filter(is_active=True).select_related("owner").order_by("-stall_id")[:6]
-    recent = CatchUpdate.objects.filter(stall__is_active=True).select_related("stall", "category")[:8]
-    return render(request, "accounts/dashboard_buyer.html", {"featured_stalls": featured, "recent_updates": recent})
+    return render(request, "accounts/dashboard_buyer.html", {"featured_stalls": featured})
 
 
 @role_required(User.Role.VENDOR)
 def vendor_dashboard(request):
-    recent = CatchUpdate.objects.filter(posted_by=request.user).select_related("stall", "category")[:6]
-    return render(request, "accounts/dashboard_vendor.html", {
-        "my_stalls": request.user.stalls.all(),
-        "recent_updates": recent,
-    })
+    return render(request, "accounts/dashboard_vendor.html", {"my_stalls": request.user.stalls.all()})
 
 
 @role_required(User.Role.ADMIN)
@@ -94,8 +88,6 @@ def admin_dashboard(request):
         "recent_users": User.objects.order_by("-created_at")[:5],
         "total_stalls": Stall.objects.count(),
         "open_stalls": Stall.objects.filter(is_active=True).count(),
-        "total_updates": CatchUpdate.objects.count(),
-        "latest_updates": CatchUpdate.objects.select_related("stall", "category")[:6],
     }
     return render(request, "accounts/dashboard_admin.html", context)
 
