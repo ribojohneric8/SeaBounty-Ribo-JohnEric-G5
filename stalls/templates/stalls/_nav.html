@@ -1,0 +1,2 @@
+<a href="{% url 'stalls:list' %}">Stalls</a>
+{% if user.is_vendor %}<a href="{% url 'stalls:mine' %}">My stalls</a>{% endif %}

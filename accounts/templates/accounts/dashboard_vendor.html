@@ -1,11 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Vendor dashboard{% endblock %}
-{% block role_nav %}<a href="#">My stalls</a><a href="#">Post catch update</a>{% endblock %}
+{% block role_nav %}{% include "stalls/_nav.html" %}{% endblock %}
 {% block content %}
-<h1>Hi {{ user.full_name }}, ready to post today's catch?</h1>
+<h1>Hi {{ user.full_name }}, ready for today?</h1>
 <p class="sub">Your vendor dashboard</p>
 <div class="grid">
-  <article class="card"><h2>My stalls</h2><p class="empty">You haven't listed a stall yet. Stall management is coming in the next phase.</p></article>
-  <article class="card"><h2>Today's catch</h2><p class="empty">Post what you have on ice so buyers can find you.</p></article>
+  <article class="card">
+    <h2>My stalls</h2>
+    <ul class="list">
+      {% for stall in my_stalls %}
+      <li><a href="{% url 'stalls:detail' stall.pk %}">{{ stall.stall_name }}</a>
+        <span>{% if stall.is_active %}<span class="badge">Open</span>{% else %}<span class="badge off">Closed</span>{% endif %}
+        <a href="{% url 'stalls:edit' stall.pk %}">Edit</a></span></li>
+      {% empty %}<li class="empty">You haven't added a stall yet.</li>{% endfor %}
+    </ul>
+    <p><a class="btn sm" href="{% url 'stalls:create' %}">Add a stall</a></p>
+  </article>
 </div>
 {% endblock %}
