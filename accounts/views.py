@@ -8,6 +8,8 @@ from django.views.decorators.http import require_POST
 
 from .decorators import role_required
 from .forms import LoginForm, ProfileForm, RegistrationForm
+from stalls.models import Stall
+
 from .models import User
 
 DASHBOARD_BY_ROLE = {
@@ -66,12 +68,13 @@ def dashboard(request):
 
 @role_required(User.Role.BUYER)
 def buyer_dashboard(request):
-    return render(request, "accounts/dashboard_buyer.html")
+    featured = Stall.objects.filter(is_active=True).select_related("owner").order_by("-stall_id")[:6]
+    return render(request, "accounts/dashboard_buyer.html", {"featured_stalls": featured})
 
 
 @role_required(User.Role.VENDOR)
 def vendor_dashboard(request):
-    return render(request, "accounts/dashboard_vendor.html")
+    return render(request, "accounts/dashboard_vendor.html", {"my_stalls": request.user.stalls.all()})
 
 
 @role_required(User.Role.ADMIN)
@@ -83,6 +86,8 @@ def admin_dashboard(request):
         "vendors": counts.get(User.Role.VENDOR, 0),
         "admins": counts.get(User.Role.ADMIN, 0),
         "recent_users": User.objects.order_by("-created_at")[:5],
+        "total_stalls": Stall.objects.count(),
+        "open_stalls": Stall.objects.filter(is_active=True).count(),
     }
     return render(request, "accounts/dashboard_admin.html", context)
 

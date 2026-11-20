@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Admin dashboard{% endblock %}
-{% block role_nav %}<a href="{% url 'admin:index' %}">Manage data</a>{% endblock %}
+{% block role_nav %}{% include "stalls/_nav.html" %}<a href="{% url 'admin:index' %}">Manage data</a>{% endblock %}
 {% block content %}
 <h1>Administrator dashboard</h1>
 <p class="sub">Overview of SeaBounty accounts</p>
@@ -9,6 +9,7 @@
   <div><strong>{{ buyers }}</strong> buyers</div>
   <div><strong>{{ vendors }}</strong> vendors</div>
   <div><strong>{{ admins }}</strong> admins</div>
+  <div><strong>{{ total_stalls }}</strong> stalls ({{ open_stalls }} open)</div>
 </div>
 <article class="card">
   <h2>Newest accounts</h2>
