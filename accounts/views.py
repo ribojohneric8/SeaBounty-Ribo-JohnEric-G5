@@ -2,9 +2,10 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 
 from .decorators import role_required
 from .forms import LoginForm, ProfileForm, RegistrationForm
@@ -26,13 +27,15 @@ def home(request):
     return redirect("accounts:login")
 
 
+@require_http_methods(["GET", "POST"])
 def register(request):
     if request.user.is_authenticated:
         return redirect("accounts:dashboard")
     form = RegistrationForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                form.save()
             messages.success(request, "Account created! You can now log in.")
             return redirect("accounts:login")
         messages.error(request, "Please fix the errors below.")
@@ -106,12 +109,14 @@ def profile(request):
     return render(request, "accounts/profile.html", {"profile_user": request.user})
 
 
+@require_http_methods(["GET", "POST"])
 @login_required
 def profile_edit(request):
     form = ProfileForm(request.POST or None, request.FILES or None, instance=request.user)
     if request.method == "POST":
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                form.save()
             messages.success(request, "Profile updated.")
             return redirect("accounts:profile")
         messages.error(request, "Your profile wasn't saved. Fix the errors below.")

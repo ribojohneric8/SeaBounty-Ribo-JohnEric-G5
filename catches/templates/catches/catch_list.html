@@ -21,7 +21,7 @@
     <tbody>
     {% for u in updates %}
       <tr>
-        <td><strong>{{ u.category.name }}</strong></td>
+        <td><strong>{{ u.category.name }}</strong>{% if u.notes %}<br><small>{{ u.notes }}</small>{% endif %}</td>
         <td class="price">₱{{ u.price_per_kg }}</td>
         <td><a href="{% url 'stalls:detail' u.stall.pk %}">{{ u.stall.stall_name }}</a></td>
         <td>{{ u.stall.location|truncatechars:35 }}</td>
@@ -33,5 +33,6 @@
     {% endfor %}
     </tbody>
   </table>
+  {% include "catches/_pagination.html" %}
 </article>
 {% endblock %}

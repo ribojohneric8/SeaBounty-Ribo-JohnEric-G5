@@ -7,9 +7,16 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
-DEBUG = os.getenv("DEBUG", "True") == "True"
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")]
+# DEBUG and secrets are controlled from .env only.
+DEBUG = os.getenv("DEBUG", "False").strip().lower() in ("1", "true", "yes")
+SECRET_KEY = os.getenv("SECRET_KEY", "")
+if not SECRET_KEY:
+    if not DEBUG:
+        from django.core.exceptions import ImproperlyConfigured
+
+        raise ImproperlyConfigured("Set SECRET_KEY in your .env file.")
+    SECRET_KEY = "dev-only-insecure-key"
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -25,6 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # serves CSS when DEBUG=False
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -65,6 +73,14 @@ DATABASES = {
     }
 }
 
+# Running `python manage.py test` creates a temporary PostgreSQL database.
+# If your database user isn't allowed to create one, set TEST_WITH_SQLITE=True in .env
+# (only the temporary test database uses SQLite; the app itself always uses PostgreSQL).
+import sys  # noqa: E402
+
+if len(sys.argv) > 1 and sys.argv[1] == "test" and os.getenv("TEST_WITH_SQLITE", "False").lower() in ("1", "true", "yes"):
+    DATABASES["default"] = {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}
+
 # --- Authentication ---
 AUTH_USER_MODEL = "accounts.User"
 AUTH_PASSWORD_VALIDATORS = [
@@ -84,10 +100,24 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+WHITENOISE_USE_FINDERS = True  # no collectstatic needed for local runs
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Browser security headers / cookies
+X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # Django's default; the token is read from the form, not JavaScript
+SESSION_COOKIE_AGE = 60 * 60 * 8  # log out after 8 hours
+if os.getenv("USE_HTTPS", "False").strip().lower() in ("1", "true", "yes"):
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Custom page instead of Django's CSRF debug page
+CSRF_FAILURE_VIEW = "config.views.csrf_failure"
 
 from django.contrib.messages import constants as message_constants  # noqa: E402
 

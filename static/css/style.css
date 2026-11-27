@@ -70,3 +70,6 @@ textarea{font:inherit;padding:.6rem .7rem;border:1.5px solid var(--line);border-
 .list li:last-child{border-bottom:0}
 .btn.sm{padding:.4rem .9rem;font-size:.9rem}
 h2.section{margin:1.5rem 0 .6rem}
+.pager{display:flex;gap:1rem;align-items:center;justify-content:center;margin-top:1rem}
+.error-page{text-align:center;padding-top:2rem}
+.error-page .code{font:800 4rem var(--head);color:var(--tide);margin:0}

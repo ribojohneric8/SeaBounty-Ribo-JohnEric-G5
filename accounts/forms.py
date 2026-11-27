@@ -22,8 +22,18 @@ class RegistrationForm(UserCreationForm):
         self.fields["full_name"].required = True
         self.fields["email"].required = True
         self.fields["contact_number"].required = False
+        self.fields["password1"].help_text = (
+            "At least 8 characters, not only numbers, not a common password, and not too similar to your name or email."
+        )
+        self.fields["password2"].help_text = ""
         self.fields["password2"].label = "Confirm password"
         self.fields["password2"].error_messages["required"] = "Please confirm your password."
+
+    def clean_full_name(self):
+        name = " ".join(self.cleaned_data["full_name"].split())
+        if len(name) < 2:
+            raise forms.ValidationError("Please enter your full name.")
+        return name
 
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
@@ -48,6 +58,12 @@ class ProfileForm(forms.ModelForm):
         model = User
         fields = ("full_name", "email", "contact_number", "profile_photo")
 
+    def clean_full_name(self):
+        name = " ".join(self.cleaned_data["full_name"].split())
+        if len(name) < 2:
+            raise forms.ValidationError("Please enter your full name.")
+        return name
+
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
         if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
@@ -59,3 +75,11 @@ class ProfileForm(forms.ModelForm):
         if photo and hasattr(photo, "size") and photo.size > 2 * 1024 * 1024:
             raise forms.ValidationError("Photo must be 2 MB or smaller.")
         return photo
+
+    def save(self, commit=True):
+        # ISS-02: delete the old photo file from disk when it is replaced or cleared
+        old = User.objects.filter(pk=self.instance.pk).values_list("profile_photo", flat=True).first()
+        user = super().save(commit=commit)
+        if commit and old and old != (user.profile_photo.name if user.profile_photo else ""):
+            user.profile_photo.storage.delete(old)
+        return user

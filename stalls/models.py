@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import MinLengthValidator
 from django.db import models
 
 
@@ -29,8 +30,8 @@ class Stall(models.Model):
         db_column="user_id",
         related_name="stalls",
     )
-    stall_name = models.CharField(max_length=100, unique=True)  # BR-03
-    location = models.TextField()
+    stall_name = models.CharField(max_length=100, unique=True, validators=[MinLengthValidator(3)])  # BR-03
+    location = models.TextField(validators=[MinLengthValidator(5)])
     operating_hours = models.CharField(max_length=100, blank=True)
     is_active = models.BooleanField(default=True)
 
