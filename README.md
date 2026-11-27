@@ -49,13 +49,32 @@ Open http://127.0.0.1:8000/
 * Registering lets you choose **Buyer** or **Vendor**.
 * The account made with `createsuperuser` is the **Administrator**.
 
-## Tests
+## Running the tests
 
 ```cmd
+venv\Scripts\activate
 python manage.py test
 ```
 
-(Tests create a temporary database, so your database user needs permission to create databases.)
+To run one app's tests: `python manage.py test catches` (or `stalls`, `accounts`).
+
+Django creates a temporary test database and deletes it afterwards; your real data is not touched.
+If your PostgreSQL/Supabase user can't create that test database, add `TEST_WITH_SQLITE=True` to `.env`
+(only the temporary test database then uses SQLite; the app itself always runs on PostgreSQL).
+
+Test files: `accounts/tests.py`, `stalls/tests.py`, `catches/tests.py`, and the PD3 hardening tests in
+`catches/test_hardening.py` (valid input, invalid input, login required, blocked access to other users'
+records, POST-only deletes, custom 404 page, pagination).
+
+## Hardening (Project Development 3)
+
+* Server-side validation on every form plus model validators and database constraints.
+* Business rules: price per kg between ₱0.01 and ₱100,000; one post per seafood type per stall per day;
+  unique stall names; posts only to the vendor's own open stalls.
+* Custom 400/403/404/500 and CSRF error pages; `DEBUG` comes from `.env` (defaults to off).
+* Every view requires login; roles are checked in the views; other users' record IDs return 404.
+* Deletes need a confirmation page and a POST; edits/deletes reject other HTTP methods.
+* `transaction.atomic()` around saves and deletes; redirect after every successful POST.
 
 ## Branching
 
