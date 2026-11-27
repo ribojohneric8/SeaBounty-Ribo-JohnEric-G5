@@ -22,6 +22,10 @@ class RegistrationForm(UserCreationForm):
         self.fields["full_name"].required = True
         self.fields["email"].required = True
         self.fields["contact_number"].required = False
+        self.fields["password1"].help_text = (
+            "At least 8 characters, not only numbers, not a common password, and not too similar to your name or email."
+        )
+        self.fields["password2"].help_text = ""
         self.fields["password2"].label = "Confirm password"
         self.fields["password2"].error_messages["required"] = "Please confirm your password."
 
