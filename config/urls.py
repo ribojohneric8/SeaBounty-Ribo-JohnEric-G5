@@ -1,7 +1,7 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -10,5 +10,10 @@ urlpatterns = [
     path("", include("accounts.urls")),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Uploaded profile photos (local development / school demo server).
+urlpatterns += [re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})]
+
+handler400 = "config.views.bad_request"
+handler403 = "config.views.permission_denied"
+handler404 = "config.views.page_not_found"
+handler500 = "config.views.server_error"

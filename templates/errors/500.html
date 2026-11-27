@@ -1,0 +1,19 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Something went wrong · SeaBounty</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">SeaBounty</a></header>
+  <main class="page">
+    <section class="auth error-page">
+      <p class="code">500</p>
+      <h1>Something went wrong</h1>
+      <p class="sub">The server hit an error. Your data wasn't changed. Try again in a moment.</p>
+      <a class="btn" href="/">Back to SeaBounty</a>
+    </section>
+  </main>
+</body>
+</html>

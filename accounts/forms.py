@@ -25,6 +25,12 @@ class RegistrationForm(UserCreationForm):
         self.fields["password2"].label = "Confirm password"
         self.fields["password2"].error_messages["required"] = "Please confirm your password."
 
+    def clean_full_name(self):
+        name = " ".join(self.cleaned_data["full_name"].split())
+        if len(name) < 2:
+            raise forms.ValidationError("Please enter your full name.")
+        return name
+
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
         if User.objects.filter(email__iexact=email).exists():
@@ -47,6 +53,12 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ("full_name", "email", "contact_number", "profile_photo")
+
+    def clean_full_name(self):
+        name = " ".join(self.cleaned_data["full_name"].split())
+        if len(name) < 2:
+            raise forms.ValidationError("Please enter your full name.")
+        return name
 
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()

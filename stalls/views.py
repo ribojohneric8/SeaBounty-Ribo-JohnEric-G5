@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -10,6 +11,12 @@ from accounts.models import User
 from .forms import StallForm
 from .models import Stall
 from .permissions import can_manage_stall
+
+
+def stall_updates_queryset():
+    from catches.models import CatchUpdate
+
+    return CatchUpdate.objects.select_related("category")
 
 
 def visible_stalls(user):
@@ -34,7 +41,12 @@ def my_stalls(request):
 
 @login_required
 def stall_detail(request, pk):
-    stall = get_object_or_404(visible_stalls(request.user), pk=pk)
+    stall = get_object_or_404(
+        visible_stalls(request.user).prefetch_related(
+            Prefetch("updates", queryset=stall_updates_queryset())
+        ),
+        pk=pk,
+    )
     return render(request, "stalls/stall_detail.html", {
         "stall": stall,
         "can_manage": can_manage_stall(request.user, stall),
@@ -46,9 +58,10 @@ def stall_create(request):
     form = StallForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
-            stall = form.save(commit=False)
-            stall.owner = request.user  # record is linked to the logged-in vendor
-            stall.save()
+            with transaction.atomic():
+                stall = form.save(commit=False)
+                stall.owner = request.user  # record is linked to the logged-in vendor
+                stall.save()
             messages.success(request, f"“{stall.stall_name}” was added.")
             return redirect("stalls:detail", pk=stall.pk)
         messages.error(request, "The stall wasn't saved. Fix the errors below.")
@@ -64,7 +77,8 @@ def stall_edit(request, pk):
     form = StallForm(request.POST or None, instance=stall)
     if request.method == "POST":
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                form.save()
             messages.success(request, "Stall updated.")
             return redirect("stalls:detail", pk=stall.pk)
         messages.error(request, "Your changes weren't saved. Fix the errors below.")
@@ -79,7 +93,8 @@ def stall_delete(request, pk):
         return redirect("accounts:dashboard")
     if request.method == "POST":
         name = stall.stall_name
-        stall.delete()
+        with transaction.atomic():  # removes the stall and its catch updates together
+            stall.delete()
         messages.success(request, f"“{name}” was deleted.")
         return redirect("accounts:dashboard")
     return render(request, "stalls/stall_confirm_delete.html", {"stall": stall})

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+{% block content %}
+<section class="auth error-page">
+  <p class="code">404</p>
+  <h1>Page not found</h1>
+  <p class="sub">This page doesn't exist, or the record was removed or isn't yours.</p>
+  <a class="btn" href="{% url 'accounts:home' %}">Go to my dashboard</a>
+</section>
+{% endblock %}

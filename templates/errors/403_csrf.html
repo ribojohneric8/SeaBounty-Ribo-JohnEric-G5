@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Form expired{% endblock %}
+{% block content %}
+<section class="auth error-page">
+  <p class="code">403</p>
+  <h1>Form expired</h1>
+  <p class="sub">This form expired or was opened in another tab. Reload the page and submit it again.</p>
+  <a class="btn" href="{% url 'accounts:home' %}">Go to my dashboard</a>
+</section>
+{% endblock %}

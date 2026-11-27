@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -59,9 +60,10 @@ def catch_create(request):
     form = CatchUpdateForm(request.POST or None, user=request.user, initial=initial)
     if request.method == "POST":
         if form.is_valid():
-            update = form.save(commit=False)
-            update.posted_by = request.user  # record is linked to the logged-in vendor
-            update.save()
+            with transaction.atomic():
+                update = form.save(commit=False)
+                update.posted_by = request.user  # record is linked to the logged-in vendor
+                update.save()
             messages.success(request, f"{update.category} posted for {update.stall}.")
             return redirect("catches:mine")
         messages.error(request, "The update wasn't posted. Fix the errors below.")
@@ -77,7 +79,8 @@ def catch_edit(request, pk):
     form = CatchUpdateForm(request.POST or None, instance=update, user=request.user)
     if request.method == "POST":
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                form.save()
             messages.success(request, "Update saved.")
             return redirect("catches:mine" if request.user.role == User.Role.VENDOR else "catches:list")
         messages.error(request, "Your changes weren't saved. Fix the errors below.")
@@ -91,7 +94,8 @@ def catch_delete(request, pk):
         messages.error(request, "You can only delete your own updates.")
         return redirect("accounts:dashboard")
     if request.method == "POST":
-        update.delete()
+        with transaction.atomic():
+            update.delete()
         messages.success(request, "Update deleted.")
         return redirect("catches:mine" if request.user.role == User.Role.VENDOR else "catches:list")
     return render(request, "catches/catch_confirm_delete.html", {"update": update})
