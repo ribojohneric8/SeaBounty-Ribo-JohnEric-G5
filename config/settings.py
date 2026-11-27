@@ -73,6 +73,14 @@ DATABASES = {
     }
 }
 
+# Running `python manage.py test` creates a temporary PostgreSQL database.
+# If your database user isn't allowed to create one, set TEST_WITH_SQLITE=True in .env
+# (only the temporary test database uses SQLite; the app itself always uses PostgreSQL).
+import sys  # noqa: E402
+
+if len(sys.argv) > 1 and sys.argv[1] == "test" and os.getenv("TEST_WITH_SQLITE", "False").lower() in ("1", "true", "yes"):
+    DATABASES["default"] = {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}
+
 # --- Authentication ---
 AUTH_USER_MODEL = "accounts.User"
 AUTH_PASSWORD_VALIDATORS = [
