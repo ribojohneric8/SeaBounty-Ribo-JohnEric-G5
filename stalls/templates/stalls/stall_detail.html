@@ -28,7 +28,7 @@
     <thead><tr><th>Seafood</th><th>Price / kg</th><th>Posted</th></tr></thead>
     <tbody>
     {% for u in stall.updates.all %}
-      <tr><td><strong>{{ u.category.name }}</strong></td><td class="price">₱{{ u.price_per_kg }}</td><td>{{ u.date_posted|date:"M j, g:i A" }}</td></tr>
+      <tr><td><strong>{{ u.category.name }}</strong>{% if u.notes %}<br><small>{{ u.notes }}</small>{% endif %}</td><td class="price">₱{{ u.price_per_kg }}</td><td>{{ u.date_posted|date:"M j, g:i A" }}</td></tr>
     {% empty %}
       <tr><td colspan="3" class="empty">Nothing posted yet.</td></tr>
     {% endfor %}

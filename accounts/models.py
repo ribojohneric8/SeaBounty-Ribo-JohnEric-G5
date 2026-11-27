@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
@@ -38,7 +39,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=100)
     role = models.CharField(max_length=15, choices=Role.choices, default=Role.BUYER)
     contact_number = models.CharField(max_length=20, blank=True)
-    profile_photo = models.ImageField(upload_to="profile_photos/", blank=True, null=True)
+    profile_photo = models.ImageField(
+        upload_to="profile_photos/",
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
+    )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

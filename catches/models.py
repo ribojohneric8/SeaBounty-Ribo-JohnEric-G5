@@ -21,6 +21,8 @@ class CatchUpdate(models.Model):
         related_name="catch_updates",
     )
     price_per_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    # ISS-01: optional short note (e.g. "about 5 kg left", "caught this morning")
+    notes = models.CharField(max_length=200, blank=True, default="")
     date_posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:

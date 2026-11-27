@@ -59,3 +59,11 @@ class ProfileForm(forms.ModelForm):
         if photo and hasattr(photo, "size") and photo.size > 2 * 1024 * 1024:
             raise forms.ValidationError("Photo must be 2 MB or smaller.")
         return photo
+
+    def save(self, commit=True):
+        # ISS-02: delete the old photo file from disk when it is replaced or cleared
+        old = User.objects.filter(pk=self.instance.pk).values_list("profile_photo", flat=True).first()
+        user = super().save(commit=commit)
+        if commit and old and old != (user.profile_photo.name if user.profile_photo else ""):
+            user.profile_photo.storage.delete(old)
+        return user

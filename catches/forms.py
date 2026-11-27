@@ -12,9 +12,12 @@ MAX_PRICE = Decimal("100000")
 class CatchUpdateForm(forms.ModelForm):
     class Meta:
         model = CatchUpdate
-        fields = ("stall", "category", "price_per_kg")
-        labels = {"price_per_kg": "Price per kg (₱)"}
-        widgets = {"price_per_kg": forms.NumberInput(attrs={"step": "0.01", "min": "0.01"})}
+        fields = ("stall", "category", "price_per_kg", "notes")
+        labels = {"price_per_kg": "Price per kg (₱)", "notes": "Notes (optional)"}
+        widgets = {
+            "price_per_kg": forms.NumberInput(attrs={"step": "0.01", "min": "0.01"}),
+            "notes": forms.TextInput(attrs={"placeholder": "e.g. about 5 kg left, caught this morning"}),
+        }
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,3 +37,6 @@ class CatchUpdateForm(forms.ModelForm):
         if price > MAX_PRICE:
             raise forms.ValidationError("That price looks too high. Please check it.")
         return price
+
+    def clean_notes(self):
+        return " ".join(self.cleaned_data.get("notes", "").split())
