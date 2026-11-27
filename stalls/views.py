@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods, require_safe
 
 from accounts.decorators import role_required
 from accounts.models import User
@@ -19,12 +20,19 @@ def stall_updates_queryset():
     return CatchUpdate.objects.select_related("category")
 
 
+def manageable_stalls(user):
+    """Stalls this user may edit/delete: their own, or all of them for an administrator."""
+    qs = Stall.objects.select_related("owner")
+    return qs if user.role == User.Role.ADMIN else qs.filter(owner=user)
+
+
 def visible_stalls(user):
     """Admins see every stall; everyone else only sees active ones."""
     qs = Stall.objects.select_related("owner")
     return qs if user.role == User.Role.ADMIN else qs.filter(is_active=True)
 
 
+@require_safe
 @login_required
 def stall_list(request):
     q = request.GET.get("q", "").strip()
@@ -34,11 +42,13 @@ def stall_list(request):
     return render(request, "stalls/stall_list.html", {"stalls": stalls, "q": q})
 
 
+@require_safe
 @role_required(User.Role.VENDOR)
 def my_stalls(request):
     return render(request, "stalls/my_stalls.html", {"stalls": request.user.stalls.all()})
 
 
+@require_safe
 @login_required
 def stall_detail(request, pk):
     stall = get_object_or_404(
@@ -53,6 +63,7 @@ def stall_detail(request, pk):
     })
 
 
+@require_http_methods(["GET", "POST"])
 @role_required(User.Role.VENDOR)
 def stall_create(request):
     form = StallForm(request.POST or None)
@@ -68,12 +79,11 @@ def stall_create(request):
     return render(request, "stalls/stall_form.html", {"form": form, "title": "Add a stall"})
 
 
+@require_http_methods(["GET", "POST"])
 @login_required
 def stall_edit(request, pk):
-    stall = get_object_or_404(Stall, pk=pk)
-    if not can_manage_stall(request.user, stall):
-        messages.error(request, "You can only edit your own stalls.")
-        return redirect("accounts:dashboard")
+    # Another vendor's stall ID returns 404, so changing the ID in the URL reveals nothing.
+    stall = get_object_or_404(manageable_stalls(request.user), pk=pk)
     form = StallForm(request.POST or None, instance=stall)
     if request.method == "POST":
         if form.is_valid():
@@ -85,12 +95,10 @@ def stall_edit(request, pk):
     return render(request, "stalls/stall_form.html", {"form": form, "title": "Edit stall", "stall": stall})
 
 
+@require_http_methods(["GET", "POST"])  # GET = confirmation page only; deleting needs POST
 @login_required
 def stall_delete(request, pk):
-    stall = get_object_or_404(Stall, pk=pk)
-    if not can_manage_stall(request.user, stall):
-        messages.error(request, "You can only delete your own stalls.")
-        return redirect("accounts:dashboard")
+    stall = get_object_or_404(manageable_stalls(request.user), pk=pk)
     if request.method == "POST":
         name = stall.stall_name
         with transaction.atomic():  # removes the stall and its catch updates together

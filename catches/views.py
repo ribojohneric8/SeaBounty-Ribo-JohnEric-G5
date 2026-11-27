@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods, require_safe
 
 from accounts.decorators import role_required
 from accounts.models import User
@@ -13,11 +14,13 @@ from .forms import CatchUpdateForm
 from .models import CatchUpdate
 
 
-def can_manage_update(user, update):
-    """The vendor who posted it, or an administrator."""
-    return user.is_authenticated and (user.role == User.Role.ADMIN or update.posted_by_id == user.pk)
+def manageable_updates(user):
+    """Updates this user may edit/delete: their own, or all of them for an administrator."""
+    qs = CatchUpdate.objects.select_related("stall", "category")
+    return qs if user.role == User.Role.ADMIN else qs.filter(posted_by=user)
 
 
+@require_safe
 @login_required
 def catch_list(request):
     """Browse and search seafood posted by active stalls."""
@@ -43,12 +46,14 @@ def catch_list(request):
     })
 
 
+@require_safe
 @role_required(User.Role.VENDOR)
 def my_updates(request):
     updates = CatchUpdate.objects.filter(posted_by=request.user).select_related("stall", "category")
     return render(request, "catches/my_updates.html", {"updates": updates})
 
 
+@require_http_methods(["GET", "POST"])
 @role_required(User.Role.VENDOR)
 def catch_create(request):
     if not Stall.objects.filter(owner=request.user, is_active=True).exists():
@@ -70,12 +75,10 @@ def catch_create(request):
     return render(request, "catches/catch_form.html", {"form": form, "title": "Post a catch update"})
 
 
+@require_http_methods(["GET", "POST"])
 @login_required
 def catch_edit(request, pk):
-    update = get_object_or_404(CatchUpdate, pk=pk)
-    if not can_manage_update(request.user, update):
-        messages.error(request, "You can only edit your own updates.")
-        return redirect("accounts:dashboard")
+    update = get_object_or_404(manageable_updates(request.user), pk=pk)
     form = CatchUpdateForm(request.POST or None, instance=update, user=request.user)
     if request.method == "POST":
         if form.is_valid():
@@ -87,12 +90,10 @@ def catch_edit(request, pk):
     return render(request, "catches/catch_form.html", {"form": form, "title": "Edit catch update", "update": update})
 
 
+@require_http_methods(["GET", "POST"])  # GET = confirmation page only; deleting needs POST
 @login_required
 def catch_delete(request, pk):
-    update = get_object_or_404(CatchUpdate, pk=pk)
-    if not can_manage_update(request.user, update):
-        messages.error(request, "You can only delete your own updates.")
-        return redirect("accounts:dashboard")
+    update = get_object_or_404(manageable_updates(request.user), pk=pk)
     if request.method == "POST":
         with transaction.atomic():
             update.delete()
