@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Access denied{% endblock %}
+{% block content %}
+<section class="auth error-page">
+  <p class="code">403</p>
+  <h1>Access denied</h1>
+  <p class="sub">You don't have permission to open this page.</p>
+  <a class="btn" href="{% url 'accounts:home' %}">Go to my dashboard</a>
+</section>
+{% endblock %}
