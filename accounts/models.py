@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, RegexValidator
 from django.db import models
 
 
@@ -38,7 +38,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=150, unique=True)  # BR-01
     full_name = models.CharField(max_length=100)
     role = models.CharField(max_length=15, choices=Role.choices, default=Role.BUYER)
-    contact_number = models.CharField(max_length=20, blank=True)
+    contact_number = models.CharField(
+        max_length=20,
+        blank=True,
+        validators=[RegexValidator(r"^\+?[0-9 \-]{7,20}$", "Enter a valid phone number (digits, spaces, dashes, optional +).")],
+    )
     profile_photo = models.ImageField(
         upload_to="profile_photos/",
         blank=True,

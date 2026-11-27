@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
 
@@ -20,7 +23,11 @@ class CatchUpdate(models.Model):
         db_column="user_id",
         related_name="catch_updates",
     )
-    price_per_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    price_per_kg = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01")), MaxValueValidator(Decimal("100000"))],
+    )
     # ISS-01: optional short note (e.g. "about 5 kg left", "caught this morning")
     notes = models.CharField(max_length=200, blank=True, default="")
     date_posted = models.DateTimeField(auto_now_add=True)
