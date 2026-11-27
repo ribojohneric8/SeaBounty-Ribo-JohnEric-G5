@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django import forms
+from django.utils import timezone
 
 from stalls.models import Stall
 
@@ -37,6 +38,21 @@ class CatchUpdateForm(forms.ModelForm):
         if price > MAX_PRICE:
             raise forms.ValidationError("That price looks too high. Please check it.")
         return price
+
+    def clean(self):
+        cleaned = super().clean()
+        stall, category = cleaned.get("stall"), cleaned.get("category")
+        if stall and category:
+            # Business rule: one post per seafood type per stall per day (edit it instead of re-posting).
+            start = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
+            duplicate = CatchUpdate.objects.filter(stall=stall, category=category, date_posted__gte=start)
+            if self.instance.pk:
+                duplicate = duplicate.exclude(pk=self.instance.pk)
+            if duplicate.exists():
+                raise forms.ValidationError(
+                    f"{category} was already posted for {stall} today. Edit that post instead of adding another."
+                )
+        return cleaned
 
     def clean_notes(self):
         return " ".join(self.cleaned_data.get("notes", "").split())
