@@ -92,12 +92,21 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
 WHITENOISE_USE_FINDERS = True  # no collectstatic needed for local runs
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Browser security headers / cookies
+X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # Django's default; the token is read from the form, not JavaScript
+SESSION_COOKIE_AGE = 60 * 60 * 8  # log out after 8 hours
+if os.getenv("USE_HTTPS", "False").strip().lower() in ("1", "true", "yes"):
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Custom page instead of Django's CSRF debug page
 CSRF_FAILURE_VIEW = "config.views.csrf_failure"
