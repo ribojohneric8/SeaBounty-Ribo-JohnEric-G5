@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -28,8 +29,13 @@ def catch_list(request):
         )
     if category_id.isdigit():
         updates = updates.filter(category_id=int(category_id))
+    page = Paginator(updates, 20).get_page(request.GET.get("page"))  # ISS-03: paginate instead of cutting at 100
+    query_string = request.GET.copy()
+    query_string.pop("page", None)
     return render(request, "catches/catch_list.html", {
-        "updates": updates[:100],
+        "updates": page.object_list,
+        "page_obj": page,
+        "query_string": query_string.urlencode(),
         "categories": SeafoodCategory.objects.all(),
         "q": q,
         "selected_category": category_id,
